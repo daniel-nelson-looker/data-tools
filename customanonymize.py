@@ -56,22 +56,16 @@ def company_name():
 ## data values and the values are the 
 ## anonymized data.
 def mapping(real_data, col_name, fake_meth):
-# 
 	final_mapping = {}
-# 
 	unique_values = set([])
-# 
 	for row in real_data:
 		unique_values.add(row[col_name])
-# 
 	real_values = list(unique_values)
-# 
 	for value in real_values:
 		final_mapping[value] = fake_meth()
-# 
 	return final_mapping
 
-
+ 
 
 
 
