@@ -54,6 +54,10 @@ def company_name():
 ## Want dictionary where keys are the real 
 ## data values and the values are the 
 ## anonymized data.
+
+## Can find the names of the methods to use by typing
+## faker -h in the terminal or going to https://github.com/joke2k/faker
+
 def mapping(real_data, col_name, fake_meth):
 	final_mapping = {}
 	unique_values = set([])
@@ -64,6 +68,7 @@ def mapping(real_data, col_name, fake_meth):
 		final_mapping[value] = fake_meth()
 	return final_mapping
  
+
 
 ## Use this class to anonymize the data.  Should only ever
 ## to pass 2 arguments, the file path to the json file, 
@@ -86,9 +91,11 @@ class AnonymizeData(object):
 		## Since BQ returns new line delimited json,
 		## going to loop through each line and make into
 		## a proper json object
+		self.datafile = []
 		for jobj in input_file.splitlines():
-			self.datafile = json.loads(jobj)
-		return self.datafile
+			u = json.loads(jobj)
+			self.datafile.append(u)
+		return 
 # 
 	## Show first ten rows of data for sanity
 	def show_data(self):
@@ -111,7 +118,31 @@ class AnonymizeData(object):
 
 
 
-
-
+## Don't touch this unless the configuration changes.
+## This allows the end user to fill out the bq_anonymize.conf
+## file and just run one script
+class ConfigAnon(object):
+# 	
+	def __init__(self):
+		self.google_storage_bucket = google_storage_bucket
+		self.destination_file = destination_file
+		self.bq_project = bq_project
+		self.bq_dataset = bq_dataset
+		self.bq_table = bq_table
+# 
+		self.bq_object = bq_project + ":" + bq_dataset + "." + bq_table
+		self.gs_uri = "gs://" + google_storage_bucket + "/" + destination_file
+# 
+# 
+# 
+# 
+# 
+	def make_bq_extract(self):
+		bq_extract = 'bq extract --destination_format=NEWLINE_DELIMITED_JSON ' + "'"  + bq_object  + "' " + gs_uri
+		return bq_extract
+# 
+	def extract_bq_to_gs(self):
+		bq_extract = make_bq_extract()
+		return os.system(bq_extract)
 
 
