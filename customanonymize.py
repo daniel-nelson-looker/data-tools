@@ -11,7 +11,8 @@ import sys
 from time import gmtime, strftime
 import random
 from faker import Faker
-
+from anon_conf import *
+import json
 
 ## Create Faker instance for a bunch of Downstream Operations
 fake = Faker()
@@ -71,9 +72,9 @@ def mapping(real_data, col_name, fake_meth):
 
 
 ## Use this class to anonymize the data.  Should only ever
-## to pass 2 arguments, the file path to the json file, 
-## and the column name to faker method 
-
+## to pass 1 arguments, the file path to the json file
+# 
+# 
 ## Example of this
 # anon = AnonymizeData(file)
 # anon.retrieve_data()
@@ -95,7 +96,7 @@ class AnonymizeData(object):
 		for jobj in input_file.splitlines():
 			u = json.loads(jobj)
 			self.datafile.append(u)
-		return 
+		return self.datafile
 # 
 	## Show first ten rows of data for sanity
 	def show_data(self):
@@ -103,6 +104,8 @@ class AnonymizeData(object):
 			print row
 		return
 # 
+	## This is the function that switches the real data with the 
+	## fake data
 	## kwargs is going to look like
 	## col1 = faker_method1, ..., colN = faker_methodN
 	def obfuscate_data(self, **kwargs):
@@ -125,13 +128,13 @@ class ConfigAnon(object):
 # 	
 	def __init__(self):
 		self.google_storage_bucket = google_storage_bucket
-		self.destination_file = destination_file
+		self.bq_destination_file = bq_destination_file
 		self.bq_project = bq_project
 		self.bq_dataset = bq_dataset
 		self.bq_table = bq_table
 # 
 		self.bq_object = bq_project + ":" + bq_dataset + "." + bq_table
-		self.gs_uri = "gs://" + google_storage_bucket + "/" + destination_file
+		self.gs_uri = "gs://" + google_storage_bucket + "/" + bq_destination_file
 # 
 # 
 # 
@@ -142,7 +145,18 @@ class ConfigAnon(object):
 		return bq_extract
 # 
 	def extract_bq_to_gs(self):
-		bq_extract = make_bq_extract()
+		bq_extract = self.make_bq_extract()
 		return os.system(bq_extract)
+# 
+	def extract_gs_to_local(self):
+		gs_extract = 'gsutil cat ' + gs_uri + ' > output_final.json'
+		return os.system(gs_extract)
+# 
+	def bring_in_column_mapping(self):
+		return mapping_dict
+
+
+
+
 
 

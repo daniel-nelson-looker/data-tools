@@ -14,19 +14,46 @@
 #
 #######################################################
 from customanonymize import *
-from bq_anonyize import *
+import sys
 
 ## Can find the names of the methods to use by typing
 ## faker -h in the terminal or going to https://github.com/joke2k/faker
 
+
 def main():
-	anon = AnonymizeData(file)
-	anon = AnonymizeData('/Users/user/Downloads/test.json')
+	mapping_dict = {"word" : company_name, "corpus" : fake.name}
+	## Instantiate config object. This will fill in conf with 
+	## the values we filled out in bq_anonymize
+	conf = ConfigAnon()
+	## Extract bq data to gs
+	conf.extract_bq_to_gs()
+	## Pull in the gs file
+	conf.extract_gs_to_local()
+	print 'Pulling down Data from Google Cloud Storage to Local'
+	## Get the real data attribute to fake data attribute mapping
+	## Instantiate anonymization object with a pointer to the
+	## json file we just extracted from bq -> gs -> local
+	anon = AnonymizeData('output_final.json')
+	## Pull the data from local to a python object
 	anon.retrieve_data()
-	anon.show_data()
-	anon.obfuscate_data(calculation_1 = company_name)
-	anon.obfuscate_data(corpus_date=fake.date, corpus=fake.name, word=company_name)
+	## Can run below for sanity
+	# anon.show_data()
+	## Do the anonymization work here.
+	## This first goes through the data to map real data values
+	## to fake ones.  This let's us create profiles.  The second
+	## step is replacing the values.
+	print 'Anonymizing Data.  This may take a while, so grab a La Croix and Chill.'
+	output_file = anon.obfuscate_data(**mapping_dict)
+	## Write to local
+	output_file_path = open('insert_to_bq.json','w')
+	print 'Writing anonymized data to local.  Here is a sample of the anonymized data'
+	## Print a sample
+	for i in output_file[0:9]:
+		print i
+	output_file_path.write(str(output_file))
+	output_file_path.close()
 	return
+
 
 if __name__ == '__main__':
 	main()
