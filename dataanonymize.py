@@ -48,7 +48,7 @@ def main():
 	output_file_path = open('insert_to_bq.json','w')
 	print 'Writing anonymized data to local.  Here is a sample of the anonymized data'
 	## Print a sample
-	for i in output_file[0:9]:
+	for i in output_file[0][0:9]:
 		print i
 	output_file_path.write(str(output_file))
 	output_file_path.close()
